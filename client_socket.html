@@ -1,0 +1,65 @@
+<html>
+<head>
+	<title>Cliente Socket</title>
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+  var socket = io.connect('http://localhost:1337');
+
+  socket.on('text', function (data) {
+    console.log(data['msg_client']);
+    $("#msgs").append("<li>"+data['msg_client']+"</li>");
+    autoscroll();
+    playSound(data['msg_client'].replace('<b>', '').replace('</b>', ' diz '));
+  });
+
+  var msg = function(msg){
+  	msg = $("#msg_escrita").val();
+  	if(msg != ''){
+  		socket.emit('msg_server', { msg: "<b>"+$("#nome").val()+"</b>: "+msg });
+  		$("#msg_escrita").val('');
+  	}	
+  	else
+  		alert('Digite a mensagem que deseja enviar.');
+  	return true;
+  }
+
+	function playSound( msg ){
+		$("#sound").attr('src', "http://translate.google.com/translate_tts?tl=pt&q="+msg);		
+	}
+
+jQuery(document).ready(function($) {
+	$("#nome").val(prompt("Qual o seu Nome ? ", "Digite aqui o seu nome."));
+	$('#msg_escrita').keydown(function(event) {
+		if (event.which == 13) {
+		 event.preventDefault();
+		 msg();
+		}
+	});
+});
+
+var autoscroll = function(){
+	$('#msgs').animate({
+			scrollTop: $('#msgs').prop("scrollHeight") 
+	}, 500);
+}
+
+</script>
+<style type="text/css">
+#chat{ width: 347px; height: 411px; background-color: #f0f0f0; padding: 10px; border: 1px solid #adadad; margin: 0 auto;}
+#chat h1 {color:#616161; font-size: 25px;}
+#msgs{ height: 300px; margin: 0; padding: 0; overflow: auto;}
+#msgs li{ list-style-type: none; background-color: #f7f7f7; margin-bottom: 2px; padding: 2px;}
+</style>
+<body>
+	<iframe id="sound" src="asd" style="width:1px; height:1px;"></iframe>
+<div id="chat">
+	<input type="hidden" id="nome">
+	<h1>Node Chat</h1>
+	<ul id="msgs">
+	</ul>
+	<input type="text" id="msg_escrita" autofocus='true'><input type="button" value="enviar" onclick="msg();">
+</div>
+</body>
+</html>
